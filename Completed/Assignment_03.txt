@@ -1,0 +1,285 @@
+1.Find Employee details and Department details using NATURAL JOIN.
+
+mysql> select e.Emp_id, e.fname, e.lname, d.dname, d.dlocation from employee e join Dept d using(Dept_id);
++--------+--------------+-----------+----------+-----------+
+| Emp_id | fname        | lname     | dname    | dlocation |
++--------+--------------+-----------+----------+-----------+
+|      1 | Anand        | Mahindra  | Computer | Banglore  |
+|      6 | Gautam       | Adani     | Computer | Banglore  |
+|      8 | Radhakrishna | Damani    | Computer | Banglore  |
+|      2 | Ratan        | Tata      | IT       | Pune      |
+|      3 | Aditya       | Birla     | IT       | Pune      |
+|      7 | Shiv         | Nadar     | IT       | Pune      |
+|     10 | Savitri      | Jindal    | IT       | Pune      |
+|      4 | Mukesh       | Ambani    | ENTC     | Mumbai    |
+|      5 | Adar         | Poonawala | ENTC     | Mumbai    |
+|      9 | Lakshmi      | Mittal    | ENTC     | Mumbai    |
++--------+--------------+-----------+----------+-----------+
+10 rows in set (0.00 sec)
+
+2. Find the fname,designation,dlocation,JoinDate
+
+mysql> select e.fname, e.designation, d.dlocation, e.JoinDate
+    ->     from Employee e
+    ->     inner join Dept d
+    ->     where e.Dept_id = d.Dept_id;
++--------------+-------------+-----------+------------+
+| fname        | designation | dlocation | JoinDate   |
++--------------+-------------+-----------+------------+
+| Anand        | CEO         | Banglore  | 2003-03-28 |
+| Gautam       | COO         | Banglore  | 2000-01-01 |
+| Radhakrishna | CFO         | Banglore  | 2001-01-01 |
+| Ratan        | CEO         | Pune      | 2000-03-28 |
+| Aditya       | COO         | Pune      | 2005-01-01 |
+| Shiv         | CFO         | Pune      | 2005-01-01 |
+| Savitri      | CTO         | Pune      | 2008-01-01 |
+| Mukesh       | CFO         | Mumbai    | 2005-01-01 |
+| Adar         | CTO         | Mumbai    | 2007-04-03 |
+| Lakshmi      | CFO         | Mumbai    | 2003-01-01 |
++--------------+-------------+-----------+------------+
+10 rows in set (0.00 sec)
+
+3.Find the Employee details ,Proj id,Project cost who does not have Project location as 'Hyderabad'.
+
+mysql> select e.fname, e.lname, p.Proj_id, p.Pcost, p.Plocation
+    -> from Employee e
+    -> left join Project p
+    -> using(Dept_id)
+    -> where Plocation not in ("Pune");
++--------------+-----------+---------+-------+-----------+
+| fname        | lname     | Proj_id | Pcost | Plocation |
++--------------+-----------+---------+-------+-----------+
+| Anand        | Mahindra  |       1 | 10000 | Mumbai    |
+| Gautam       | Adani     |       1 | 10000 | Mumbai    |
+| Radhakrishna | Damani    |       1 | 10000 | Mumbai    |
+| Anand        | Mahindra  |       3 |  8000 | Banglore  |
+| Gautam       | Adani     |       3 |  8000 | Banglore  |
+| Radhakrishna | Damani    |       3 |  8000 | Banglore  |
+| Mukesh       | Ambani    |       4 | 12000 | Noida     |
+| Adar         | Poonawala |       4 | 12000 | Noida     |
+| Lakshmi      | Mittal    |       4 | 12000 | Noida     |
++--------------+-----------+---------+-------+-----------+
+9 rows in set (0.00 sec)
+
+
+4. Find Department Name ,employee name, designation for which project year is 2020
+
+select 
+	e.Emp_id,
+    d.Dept_id,
+	d.dname,
+    	e.fname,
+    e.designation,
+    p.Proj_id as project_id,
+    p.Pyear
+from employee e
+join dept d using(Dept_id)
+right join project p using(Dept_id)
+where p.Pyear = 2010;
++--------+---------+----------+--------------+-------------+------------+-------+
+| Emp_id | Dept_id | dname    | fname        | designation | project_id | Pyear |
++--------+---------+----------+--------------+-------------+------------+-------+
+|      1 |       1 | Computer | Anand        | CEO         |          3 | 2010  |
+|      6 |       1 | Computer | Gautam       | COO         |          3 | 2010  |
+|      8 |       1 | Computer | Radhakrishna | CFO         |          3 | 2010  |
++--------+---------+----------+--------------+-------------+------------+-------+
+3 rows in set (0.00 sec)
+
+
+
+5. Display designation,Dept id which Project cost is greater than 30000
+// i have taken 8000 instead of 30000
+
+select 
+    p.Proj_id,
+    p.Pcost,
+	e.Emp_id,
+    e.fname,
+    e.designation,
+    e.Dept_id
+from project p
+left join employee e using(Dept_id)
+where p.Pcost > 8000;
+
++---------+-------+--------+--------------+-------------+---------+
+| Proj_id | Pcost | Emp_id | fname        | designation | Dept_id |
++---------+-------+--------+--------------+-------------+---------+
+|       1 | 10000 |      1 | Anand        | CEO         |       1 |
+|       1 | 10000 |      6 | Gautam       | COO         |       1 |
+|       1 | 10000 |      8 | Radhakrishna | CFO         |       1 |
+|       2 | 10000 |      2 | Ratan        | CEO         |       2 |
+|       2 | 10000 |      3 | Aditya       | COO         |       2 |
+|       2 | 10000 |      7 | Shiv         | CFO         |       2 |
+|       2 | 10000 |     10 | Savitri      | CTO         |       2 |
+|       5 | 18000 |      2 | Ratan        | CEO         |       2 |
+|       5 | 18000 |      3 | Aditya       | COO         |       2 |
+|       5 | 18000 |      7 | Shiv         | CFO         |       2 |
+|       5 | 18000 |     10 | Savitri      | CTO         |       2 |
+|       6 |  9000 |   NULL | NULL         | NULL        |    NULL |
++---------+-------+--------+--------------+-------------+---------+
+12 rows in set (0.00 sec)
+
+
+6.Find the names of all the Projects that started in the year 2015.
+// i have taken year as 2010
+
+mysql> select d.Dept_id as DepartmentId, p.Proj_id, p.Dept_id, p.Pname, p.Pyear
+    -> from Dept d
+    -> left join Project p
+    -> using (Dept_id) where Pyear = 2010;
++--------------+---------+---------+------------+-------+
+| DepartmentId | Proj_id | Dept_id | Pname      | Pyear |
++--------------+---------+---------+------------+-------+
+|            1 |       3 |       1 | Student_DB | 2010  |
++--------------+---------+---------+------------+-------+
+1 row in set (0.00 sec)
+
+
+7. List the dname having number of employees are 10
+//USING INNER JOIN
+
+mysql> select d.dname, d.Dept_id, count(e.Dept_id)
+    -> from Dept d
+    -> inner join Employee e
+    -> using (Dept_id)
+    -> group by e.Dept_id;
++------------+---------+------------------+
+| dname      | Dept_id | count(e.Dept_id) |
++------------+---------+------------------+
+| Finance    |       1 |                3 |
+| Marketing  |       2 |                4 |
+| Operations |       3 |                3 |
+| Sales      |       4 |                1 |
++------------+---------+------------------+
+4 rows in set (0.00 sec)
+
+
+
+USING LEFT JOIN
+mysql> select d.dname, d.Dept_id, count(e.Dept_id)
+    -> from Dept d
+    -> left join Employee e
+    -> using (Dept_id)
+    -> group by e.Dept_id;
++------------+---------+------------------+
+| dname      | Dept_id | count(e.Dept_id) |
++------------+---------+------------------+
+| Finance    |       1 |                3 |
+| Marketing  |       2 |                4 |
+| Operations |       3 |                3 |
+| Sales      |       4 |                1 |
+| Futures    |       5 |                0 |
++------------+---------+------------------+
+
+mysql> select d.dname, d.Dept_id, count(e.Dept_id)
+    -> from Dept d
+    -> left join Employee e
+    -> using (Dept_id)
+    -> group by e.Dept_id
+    -> having count(e.Dept_id) = 3;
++------------+---------+------------------+
+| dname      | Dept_id | count(e.Dept_id) |
++------------+---------+------------------+
+| Finance    |       1 |                3 |
+| Operations |       3 |                3 |
++------------+---------+------------------+
+2 rows in set (0.00 sec)
+
+8. Display the total number of employee who have joined any project before 2009
+
+mysql> select count(e.Emp_id) as Count
+    -> from Employee e
+    -> inner join Project p on e.Dept_id = p.Dept_id 
+					and 
+					p.Pyear < 2010;
++-------+
+| Count |
++-------+
+|    10 |
++-------+
+1 row in set (0.00 sec)
+
+
+
+9.Create a view showing the employee and Department details.
+
+create view EmpDept as 
+select 
+	e.Emp_id,
+    concat(fname, ' ', lname) as name,
+    e.Dept_id,
+    e.designation,
+    e.salary,
+    d.dname
+from employee e
+join Dept d using (Dept_id);
+
+mysql> select * from EmpDept;
++--------+---------------------+---------+-------------+---------+----------+
+| Emp_id | name                | Dept_id | designation | salary  | dname    |
++--------+---------------------+---------+-------------+---------+----------+
+|      1 | Anand Mahindra      |       1 | CEO         | 2000000 | Computer |
+|      6 | Gautam Adani        |       1 | COO         | 2800000 | Computer |
+|      8 | Radhakrishna Damani |       1 | CFO         | 2500000 | Computer |
+|      2 | Ratan Tata          |       2 | CEO         | 2200000 | IT       |
+|      3 | Aditya Birla        |       2 | COO         | 1800000 | IT       |
+|      7 | Shiv Nadar          |       2 | CFO         | 1900000 | IT       |
+|     10 | Savitri Jindal      |       2 | CTO         | 2600000 | IT       |
+|      4 | Mukesh Ambani       |       3 | CFO         | 2500000 | ENTC     |
+|      5 | Adar Poonawala      |       3 | CTO         | 2100000 | ENTC     |
+|      9 | Lakshmi Mittal      |       3 | CFO         | 2200000 | ENTC     |
++--------+---------------------+---------+-------------+---------+----------+
+10 rows in set (0.00 sec)
+
+
+10. Perform Manipulation on simple view-Insert, update, delete, drop view. 
+
+UPDATE:
+
+update EmpDept
+set designation = 'CXO'
+where Emp_id = 1;
+
+mysql> select * from EmpDept;
++--------+---------------------+---------+-------------+---------+----------+
+| Emp_id | name                | Dept_id | designation | salary  | dname    |
++--------+---------------------+---------+-------------+---------+----------+
+|      1 | Anand Mahindra      |       1 | CXO         | 2000000 | Computer |
+|      6 | Gautam Adani        |       1 | COO         | 2800000 | Computer |
+|      8 | Radhakrishna Damani |       1 | CFO         | 2500000 | Computer |
+|      2 | Ratan Tata          |       2 | CEO         | 2200000 | IT       |
+|      3 | Aditya Birla        |       2 | COO         | 1800000 | IT       |
+|      7 | Shiv Nadar          |       2 | CFO         | 1900000 | IT       |
+|     10 | Savitri Jindal      |       2 | CTO         | 2600000 | IT       |
+|      4 | Mukesh Ambani       |       3 | CFO         | 2500000 | ENTC     |
+|      5 | Adar Poonawala      |       3 | CTO         | 2100000 | ENTC     |
+|      9 | Lakshmi Mittal      |       3 | CFO         | 2200000 | ENTC     |
++--------+---------------------+---------+-------------+---------+----------+
+10 rows in set (0.01 sec)
+
+DROP:
+
+drop view EmpDept;
+
+mysql> select * from EmpDept;
+ERROR 1146 (42S02): Table 'college.empdept' doesn't exist
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

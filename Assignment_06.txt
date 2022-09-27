@@ -1,0 +1,155 @@
+
+// LEARNING CURSOR BY TAKING AN EXAMPLE:
+
+mysql> create procedure proc_trial()
+    ->     begin
+    ->     declare name varchar(100);
+    ->     declare finished integer default 0;
+    ->     declare c1 cursor for select fname from Employee;
+    ->     declare continue handler for NOT FOUND set finished = 1;
+    ->     open c1;
+    ->     emp_name : LOOP
+    ->     fetch c1 into name;
+    ->     if finished = 1 then
+    ->     leave emp_name;
+    ->     end if;
+    ->     select concat(name) as Emp_Name;
+    ->     END LOOP emp_name;
+    ->     close c1;
+    ->     end //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call proc_trial() //
++----------+
+| Emp_Name |
++----------+
+| Aditya   |
++----------+
+1 row in set (0.00 sec)
+
++----------+
+| Emp_Name |
++----------+
+| Anand    |
++----------+
+1 row in set (0.00 sec)
+
++----------+
+| Emp_Name |
++----------+
+| Gautam   |
++----------+
+1 row in set (0.00 sec)
+
++--------------+
+| Emp_Name     |
++--------------+
+| Radhakrishna |
++--------------+
+1 row in set (0.00 sec)
+
++----------+
+| Emp_Name |
++----------+
+| Ratan    |
++----------+
+1 row in set (0.00 sec)
+
++----------+
+| Emp_Name |
++----------+
+| Shiv     |
++----------+
+1 row in set (0.00 sec)
+
+
+
+// Assignment Part:
+mysql> 
+mysql> create table Old_Emp(
+    -> id int primary key,
+    -> name varchar(20),
+    -> salary int,
+    -> deptName varchar(20)
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> desc Old_Emp;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | int(11)     | NO   | PRI | NULL    |       |
+| name     | varchar(20) | YES  |     | NULL    |       |
+| salary   | int(11)     | YES  |     | NULL    |       |
+| deptName | varchar(20) | YES  |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+
+mysql> insert into Old_Emp values(1, "AAAA", 10000, "Finance");
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Old_Emp values(2, "BBBB", 12000, "Sales");
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Old_Emp values(3, "CCCC", 14000, "Marketing");
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Old_Emp values(4, "DDDD", 16000, "Social");
+Query OK, 1 row affected (0.02 sec)
+
+mysql> select * from Old_Emp;
++----+------+--------+-----------+
+| id | name | salary | deptName  |
++----+------+--------+-----------+
+|  1 | AAAA |  10000 | Finance   |
+|  2 | BBBB |  12000 | Sales     |
+|  3 | CCCC |  14000 | Marketing |
+|  4 | DDDD |  16000 | Social    |
++----+------+--------+-----------+
+4 rows in set (0.00 sec)
+
+mysql> create table New_Emp(
+    -> id int primary key,
+    -> name varchar(20),
+    -> salary int,
+    -> dept_Name varchar(20)
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+
+
+
+create procedure mergeEmp()
+    begin
+    declare finished int default 0;
+    declare exit int default 0;
+    declare id int; 
+    declare salary int;
+    declare ename varchar(20);
+    declare eDept varchar(20);
+    declare cur cursor for select * from Old_Emp;
+    declare continue handler for SQLSTATE '23000' set finished = 1; 
+    declare continue handler for NOT FOUND set exit = 1;
+    open cur;
+    myLoop : LOOP
+    if exit = 1 then
+    leave myLoop;
+    if not finished = 1 then
+    fetch cur into id, ename, salary , eDept;
+    select concat(id, ename, salary, eDept) as Data;
+    insert into New_Emp values(id, ename, salary, eDept);
+    end if;
+    set f = 0;
+    end loop myLoop;
+    close cur;
+    end //
+ERROR 1193 (HY000): Unknown system variable 'finished'
+
+
+
+
+
+
+
+

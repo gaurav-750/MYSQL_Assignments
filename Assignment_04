@@ -1,0 +1,294 @@
+mysql> delimiter //
+mysql> create procedure calArea(in rad int)
+    -> begin
+    -> declare myarea float;
+    -> set myarea = 3.14*rad*rad;
+    -> insert into Areas values (rad, myarea);
+    -> end//
+
+Query OK, 0 rows affected (13.44 sec)
+
+mysql> 
+mysql> call calArea(5);
+call calArea(5);
+^C
+mysql> delimiter ;
+mysql> call calArea(5);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from Areas;
++--------+-------+
+| radius | area  |
++--------+-------+
+|      1 |  3.14 |
+|      2 | 12.56 |
+|      3 | 28.26 |
+|      4 | 50.24 |
+|      5 |  78.5 |
++--------+-------+
+5 rows in set (0.00 sec)
+
+mysql> call calArea(10);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from Areas;
++--------+-------+
+| radius | area  |
++--------+-------+
+|      1 |  3.14 |
+|      2 | 12.56 |
+|      3 | 28.26 |
+|      4 | 50.24 |
+|      5 |  78.5 |
+|     10 |   314 |
++--------+-------+
+
+
+
+
+
+
+
+
+
+
+
+					DATE - 23-08-2022
+
+mysql> create table Borrower(
+    -> rollno int primary key,
+    -> name varchar(20),
+    -> DOI date,
+    -> bookName varchar(30),
+    -> status varchar(10)
+    -> );
+Query OK, 0 rows affected (0.09 sec)
+
+
+mysql> create table Fine(
+    -> rollno int primary key,
+    -> curDate date,
+    -> amount int
+    -> );
+
+mysql> create procedure insertB(in rollno int, in name varchar(20), in DOI date, in bookName varchar(30), in status varchar(10) ) begin insert into Borrower values(rollno, name, DOI, bookName, status);
+    -> end//
+
+
+mysql> call insertB(1, "Kanak", '2022-01-01', "Hardy Boys", "I");
+Query OK, 1 row affected (0.06 sec)
+
+mysql> select * from Borrower;
++--------+-------+------------+------------+--------+
+| rollno | name  | DOI        | bookName   | status |
++--------+-------+------------+------------+--------+
+|      1 | Kanak | 2022-01-01 | Hardy Boys | I      |
++--------+-------+------------+------------+--------+
+
+
+mysql> call insertB(2, "Sarthak", '2022-01-05', "The 1000 year Old Boy", "I");
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from Borrower;
++--------+---------+------------+-----------------------+--------+
+| rollno | name    | DOI        | bookName              | status |
++--------+---------+------------+-----------------------+--------+
+|      1 | Kanak   | 2022-01-01 | Hardy Boys            | I      |
+|      2 | Sarthak | 2022-01-05 | The 1000 year Old Boy | I      |
++--------+---------+------------+-----------------------+--------+
+2 rows in set (0.00 sec)
+
+
+
+mysql> create table Fine(
+    -> rollno int,
+    -> DOR date,
+    -> amount int,
+    -> foreign key (rollno) references Borrower(rollno)
+    -> );
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> desc Fine;
++--------+---------+------+-----+---------+-------+
+| Field  | Type    | Null | Key | Default | Extra |
++--------+---------+------+-----+---------+-------+
+| rollno | int(11) | YES  | MUL | NULL    |       |
+| DOR    | date    | YES  |     | NULL    |       |
+| amount | int(11) | YES  |     | NULL    |       |
++--------+---------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> insert into Fine values(1, '2022-01-20', null);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from Fine;
++--------+------------+--------+
+| rollno | DOR        | amount |
++--------+------------+--------+
+|      1 | 2022-01-20 |   NULL |
++--------+------------+--------+
+1 row in set (0.00 sec)
+
+mysql> insert into Fine values(2, '2022-02-10', null);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from Fine;
++--------+------------+--------+
+| rollno | DOR        | amount |
++--------+------------+--------+
+|      1 | 2022-01-20 |   NULL |
+|      2 | 2022-02-10 |   NULL |
++--------+------------+--------+
+2 rows in set (0.00 sec)
+
+mysql> creat
+mysql> select * from Borrower;
++--------+---------+------------+-----------------------+--------+
+| rollno | name    | DOI        | bookName              | status |
++--------+---------+------------+-----------------------+--------+
+|      1 | Kanak   | 2022-01-01 | Hardy Boys            | I      |
+|      2 | Sarthak | 2022-01-05 | The 1000 year Old Boy | I      |
++--------+---------+------------+-----------------------+--------+
+2 rows in set (0.00 sec)
+
+mysql> select * from Fine;
++--------+------------+--------+
+| rollno | DOR        | amount |
++--------+------------+--------+
+|      1 | 2022-01-20 |   NULL |
+|      2 | 2022-02-10 |   NULL |
++--------+------------+-------
+
+
+
+
+					//PROCEDURE:
+					
+mysql> create procedure calcFine(in roll_no int, in date_of_return date) 
+	begin 
+	declare fine int; 
+	declare date_of_issue date; 
+	declare num_days int; 
+	set fine = 0; 
+	
+	select concat('fine declared:', fine); 
+	
+	set date_of_issue = (select DOI from Borrower where rollno = roll_no);  
+	set num_days = DATEDIFF(date_of_return, date_of_issue); 
+	
+	select concat('Number of days:', num_days); 
+	
+	if (num_days >= 15 and num_days <= 30) then 
+	set fine = 5*num_days; 
+	elseif (num_days > 30) then 
+	set fine = 75 + 50*(num_days-30); 
+	end if; 
+	
+	select concat('calculated fineis:', fine); 
+	
+	update Borrower 
+	set status = 'R' 
+	where rollno = roll_no; 
+	update Fine 
+	set amount = fine 
+	where rollno = roll_no; 
+	end//
+
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter ;
+mysql> call calcFine(1, '2022-01-20');
++--------------------------------+
+| concat('fine declared:', fine) |
++--------------------------------+
+| fine declared:0                |
++--------------------------------+
+1 row in set (0.00 sec)
+
++-------------------------------------+
+| concat('Number of days:', num_days) |
++-------------------------------------+
+| Number of days:19                   |
++-------------------------------------+
+1 row in set (0.00 sec)
+
++------------------------------------+
+| concat('calculated fineis:', fine) |
++------------------------------------+
+| calculated fineis:95               |
++------------------------------------+
+1 row in set (0.00 sec)
+
+Query OK, 1 row affected (0.03 sec)
+
+mysql> select * from Fine;
++--------+------------+--------+
+| rollno | DOR        | amount |
++--------+------------+--------+
+|      1 | 2022-01-20 |     95 |
+|      2 | 2022-02-10 |   NULL |
++--------+------------+--------+
+2 rows in set (0.00 sec)
+
+mysql> select * from Borrower;
++--------+---------+------------+-----------------------+--------+
+| rollno | name    | DOI        | bookName              | status |
++--------+---------+------------+-----------------------+--------+
+|      1 | Kanak   | 2022-01-01 | Hardy Boys            | R      |
+|      2 | Sarthak | 2022-01-05 | The 1000 year Old Boy | I      |
++--------+---------+------------+-----------------------+--------+
+2 rows in set (0.00 sec)
+
+
+mysql> call calcFine(2, '2022-02-10');
++--------------------------------+
+| concat('fine declared:', fine) |
++--------------------------------+
+| fine declared:0                |
++--------------------------------+
+1 row in set (0.00 sec)
+
++-------------------------------------+
+| concat('Number of days:', num_days) |
++-------------------------------------+
+| Number of days:36                   |
++-------------------------------------+
+1 row in set (0.00 sec)
+
++------------------------------------+
+| concat('calculated fineis:', fine) |
++------------------------------------+
+| calculated fineis:1800             |
++------------------------------------+
+1 row in set (0.00 sec)
+
+Query OK, 1 row affected (0.02 sec)
+
+
+
+
+mysql> select * from Fine;
++--------+------------+--------+
+| rollno | DOR        | amount |
++--------+------------+--------+
+|      1 | 2022-01-20 |     95 |
+|      2 | 2022-02-10 |   1800 |
++--------+------------+--------+
+2 rows in set (0.00 sec)
+
+mysql> select * from Borrower;
++--------+---------+------------+-----------------------+--------+
+| rollno | name    | DOI        | bookName              | status |
++--------+---------+------------+-----------------------+--------+
+|      1 | Kanak   | 2022-01-01 | Hardy Boys            | R      |
+|      2 | Sarthak | 2022-01-05 | The 1000 year Old Boy | R      |
++--------+---------+------------+-----------------------+--------+
+2 rows in set (0.00 sec)
+
+
+
+
+
+
+
+

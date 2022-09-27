@@ -1,0 +1,240 @@
+1)
+
+insert into Employee values(1, 3, "Adar", "Poonawala", "CTO", 2100000, "2007-04-03");
+insert into Employee values(2 1, "Gautam", "Adani", "COO", 2800000, "2000-01-01");
+insert into Employee values(3, 2, "Shiv", "Nadar", "CFO", 1900000, "2005-01-01");
+insert into Employee values(4, 1, "Radhakrishna", "Damani", "CEO", 2500000, "2001-01-01");
+insert into Employee values(5, 2, "Savitri", "Jindal", "CTO", 2600000, "2008-01-01");
+insert into Employee values(6, 1, "Gautam", "Adani", "COO", 2800000, "2000-01-01");
+insert into Employee values(7, 2, "Shiv", "Nadar", "CFO", 1900000, "2005-01-01");
+insert into Employee values(8, 1, "Radhakrishna", "Damani", "CEO", 2500000, "2001-01-01");
+insert into Employee values(10, 2, "Savitri", "Jindal", "CTO", 2600000, "2008-01-01");
+
+select * from Employee;
++--------+---------+--------------+-----------+-------------+---------+------------+
+| Emp_id | Dept_id | fname        | lname     | designation | salary  | JoinDate   |
++--------+---------+--------------+-----------+-------------+---------+------------+
+|      1 |       1 | Anand        | Mahindra  | CEO         | 2000000 | 2003-03-28 |
+|      2 |       2 | Ratan        | Tata      | CEO         | 2200000 | 2000-03-28 |
+|      3 |       2 | Aditya       | Birla     | COO         | 1800000 | 2005-01-01 |
+|      4 |       3 | Mukesh       | Ambani    | CFO         | 2500000 | 2005-01-01 |
+|      5 |       3 | Adar         | Poonawala | CTO         | 2100000 | 2007-04-03 |
+|      6 |       1 | Gautam       | Adani     | COO         | 2800000 | 2000-01-01 |
+|      7 |       2 | Shiv         | Nadar     | CFO         | 1900000 | 2005-01-01 |
+|      8 |       1 | Radhakrishna | Damani    | CFO         | 2500000 | 2001-01-01 |
+|      9 |       3 | Lakshmi      | Mittal    | CFO         | 2200000 | 2003-01-01 |
+|     10 |       2 | Savitri      | Jindal    | CTO         | 2600000 | 2008-01-01 |
++--------+---------+--------------+-----------+-------------+---------+------------+
+10 rows in set (0.00 sec)
+
+
+mysql> select * from Dept;
++---------+------------+-----------+
+| Dept_id | dname      | dlocation |
++---------+------------+-----------+
+|       1 | Finance    | Banglore  |
+|       2 | Marketing  | Pune      |
+|       3 | Operations | Mumbai    |
+|       4 | Sales      | Hyderabad |
+|       5 | Futures    | Delhi     |
++---------+------------+-----------+
+5 rows in set (0.01 sec)
+
+
+mysql> select * from project;
++---------+---------+-----------------+-----------+-------+-------+
+| Proj_id | Dept_id | Pname           | Plocation | Pcost | Pyear |
++---------+---------+-----------------+-----------+-------+-------+
+|       1 |       1 | E-Commerce      | Mumbai    | 10000 | 2008  |
+|       2 |       2 | Library-Man     | Pune      | 10000 | 2007  |
+|       3 |       1 | Student_DB      | Banglore  |  8000 | 2010  |
+|       5 |       2 | Payment-Gateway | Pune      | 18000 | 2022  |
+|       6 |       5 | Workout-App     | Delhi     |  9000 | 2020  |
++---------+---------+-----------------+-----------+-------+-------+
+5 rows in set (0.00 sec)
+
+2) Display all Employee details with Department ‘Computer’ and ‘IT’ and Employee
+    first name starting with  'a' or 'r'.
+
+select 
+	emp_id,
+    concat(fname, ' ', lname) as name,
+    d.dname as Department,
+    designation,
+    JoinDate,
+    d.dlocation
+from employee e
+join dept d using(dept_id)
+where d.dname in ('Computer', 'IT')
+	and
+    e.fname regexp ('^A|^R');
+
++--------+---------------------+------------+-------------+------------+-----------+
+| emp_id | name                | Department | designation | JoinDate   | dlocation |
++--------+---------------------+------------+-------------+------------+-----------+
+|      1 | Anand Mahindra      | Computer   | CEO         | 2003-03-28 | Banglore  |
+|      8 | Radhakrishna Damani | Computer   | CFO         | 2001-01-01 | Banglore  |
+|      2 | Ratan Tata          | IT         | CEO         | 2000-03-28 | Pune      |
+|      3 | Aditya Birla        | IT         | COO         | 2005-01-01 | Pune      |
++--------+---------------------+------------+-------------+------------+-----------+
+4 rows in set (0.00 sec)
+
+
+
+3)  Lists the number of different Employee Positions.  
+
+select distinct designation
+from employee;
++-------------+
+| designation |
++-------------+
+| CEO         |
+| COO         |
+| CFO         |
+| CTO         |
++-------------+
+4 rows in set (0.00 sec)
+
+
+
+4) Give 10% increase in Salary of the Employee whose joindate  before 2015.  
+// I have taken 2005 instead of 2015
+
+select 
+	*,
+    (salary*1.1) as increased_salary
+from employee
+where year(JoinDate) < '2005';
++--------+---------+--------------+----------+-------------+---------+------------+------------------+
+| Emp_id | Dept_id | fname        | lname    | designation | salary  | JoinDate   | increased_salary |
++--------+---------+--------------+----------+-------------+---------+------------+------------------+
+|      1 |       1 | Anand        | Mahindra | CEO         | 2000000 | 2003-03-28 |        2200000.0 |
+|      2 |       2 | Ratan        | Tata     | CEO         | 2200000 | 2000-03-28 |        2420000.0 |
+|      6 |       1 | Gautam       | Adani    | COO         | 2800000 | 2000-01-01 |        3080000.0 |
+|      8 |       1 | Radhakrishna | Damani   | CFO         | 2500000 | 2001-01-01 |        2750000.0 |
+|      9 |       3 | Lakshmi      | Mittal   | CFO         | 2200000 | 2003-01-01 |        2420000.0 |
++--------+---------+--------------+----------+-------------+---------+------------+------------------+
+5 rows in set (0.00 sec)
+
+
+5)  Delete all the department details having location as ‘mumbai’.  
+
+mysql> delete from Dept where dlocation = 'Mumbai';
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from Dept;
++---------+----------+-----------+
+| Dept_id | dname    | dlocation |
++---------+----------+-----------+
+|       1 | Computer | Banglore  |
+|       2 | IT       | Pune      |
+|       4 | Computer | Hyderabad |
+|       5 | IT       | Delhi     |
++---------+----------+-----------+
+4 rows in set (0.00 sec)
+
+
+
+6) Find the names of Projects with location ‘pune’ 
+
+mysql> select * FROM project where Plocation = 'Pune';
++---------+---------+-----------------+-----------+-------+-------+
+| Proj_id | Dept_id | Pname           | Plocation | Pcost | Pyear |
++---------+---------+-----------------+-----------+-------+-------+
+|       2 |       2 | Library-Man     | Pune      | 10000 | 2007  |
+|       5 |       2 | Payment-Gateway | Pune      | 18000 | 2022  |
++---------+---------+-----------------+-----------+-------+-------+
+2 rows in set (0.00 sec)
+
+
+
+7) Find the project having cost in between 100000 to 500000. 
+// I have taken in between 10000 and 18000
+
+mysql> select * from project where Pcost between 10000 and 18000;
++---------+---------+-----------------+-----------+-------+-------+
+| Proj_id | Dept_id | Pname           | Plocation | Pcost | Pyear |
++---------+---------+-----------------+-----------+-------+-------+
+|       1 |       1 | E-Commerce      | Mumbai    | 10000 | 2008  |
+|       2 |       2 | Library-Man     | Pune      | 10000 | 2007  |
+|       5 |       2 | Payment-Gateway | Pune      | 18000 | 2022  |
++---------+---------+-----------------+-----------+-------+-------+
+3 rows in set (0.00 sec)
+
+
+
+8)  Find the project having maximum price and find average Project cost.
+
+mysql> select Proj_id,    Pname,    Pcost as cost,    round(avg(Pcost)) as average_cost from project where Pcost = (select max(Pcost) from project);
++---------+-----------------+-------+--------------+
+| Proj_id | Pname           | cost  | average_cost |
++---------+-----------------+-------+--------------+
+|       5 | Payment-Gateway | 18000 |        18000 |
++---------+-----------------+-------+--------------+
+1 row in set (0.00 sec)
+
+
+9)  Display all employees with Emp _id  and Emp name in descending  order.
+
+mysql> select * from employee order by Emp_id DESC;
++--------+---------+--------------+-----------+-------------+---------+------------+
+| Emp_id | Dept_id | fname        | lname     | designation | salary  | JoinDate   |
++--------+---------+--------------+-----------+-------------+---------+------------+
+|     10 |       2 | Savitri      | Jindal    | CTO         | 2600000 | 2008-01-01 |
+|      9 |       3 | Lakshmi      | Mittal    | CFO         | 2200000 | 2003-01-01 |
+|      8 |       1 | Radhakrishna | Damani    | CFO         | 2500000 | 2001-01-01 |
+|      7 |       2 | Shiv         | Nadar     | CFO         | 1900000 | 2005-01-01 |
+|      6 |       1 | Gautam       | Adani     | COO         | 2800000 | 2000-01-01 |
+|      5 |       3 | Adar         | Poonawala | CTO         | 2100000 | 2007-04-03 |
+|      4 |       3 | Mukesh       | Ambani    | CFO         | 2500000 | 2005-01-01 |
+|      3 |       2 | Aditya       | Birla     | COO         | 1800000 | 2005-01-01 |
+|      2 |       2 | Ratan        | Tata      | CEO         | 2200000 | 2000-03-28 |
+|      1 |       1 | Anand        | Mahindra  | CEO         | 2000000 | 2003-03-28 |
++--------+---------+--------------+-----------+-------------+---------+------------+
+
+
+mysql> select * from employee order by fname DESC;
++--------+---------+--------------+-----------+-------------+---------+------------+
+| Emp_id | Dept_id | fname        | lname     | designation | salary  | JoinDate   |
++--------+---------+--------------+-----------+-------------+---------+------------+
+|      7 |       2 | Shiv         | Nadar     | CFO         | 1900000 | 2005-01-01 |
+|     10 |       2 | Savitri      | Jindal    | CTO         | 2600000 | 2008-01-01 |
+|      2 |       2 | Ratan        | Tata      | CEO         | 2200000 | 2000-03-28 |
+|      8 |       1 | Radhakrishna | Damani    | CFO         | 2500000 | 2001-01-01 |
+|      4 |       3 | Mukesh       | Ambani    | CFO         | 2500000 | 2005-01-01 |
+|      9 |       3 | Lakshmi      | Mittal    | CFO         | 2200000 | 2003-01-01 |
+|      6 |       1 | Gautam       | Adani     | COO         | 2800000 | 2000-01-01 |
+|      1 |       1 | Anand        | Mahindra  | CEO         | 2000000 | 2003-03-28 |
+|      3 |       2 | Aditya       | Birla     | COO         | 1800000 | 2005-01-01 |
+|      5 |       3 | Adar         | Poonawala | CTO         | 2100000 | 2007-04-03 |
++--------+---------+--------------+-----------+-------------+---------+------------+
+10 rows in set (0.00 sec)
+
+
+
+
+10) Display Proj_name,Plocation ,Pcost of all project started in 2004,2005,2007   
+// I have taken 2007, 2008, 2010 as resp.years
+
+select 
+	Pname,
+    Plocation,
+    Pcost,
+    Pyear
+from project
+where Pyear in ('2007', '2008', '2010');
+
++-------------+-----------+-------+-------+
+| Pname       | Plocation | Pcost | Pyear |
++-------------+-----------+-------+-------+
+| E-Commerce  | Mumbai    | 10000 | 2008  |
+| Library-Man | Pune      | 10000 | 2007  |
+| Student_DB  | Banglore  |  8000 | 2010  |
++-------------+-----------+-------+-------+
+3 rows in set (0.00 sec)
+
+
+
+
+
+
