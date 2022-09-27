@@ -1,0 +1,167 @@
+create a Library table
+create a library audit table with the same cols
+
+create table Library(
+	isbn int primary key auto_increment,
+    book_name varchar(50),
+    author varchar(30),
+    publish_year varchar(4)
+);
+
+insert into Library values(
+	default,
+    "Time travelling with hampster",
+    "Ross Welford",
+    "2016"
+);
+
+insert into Library values(
+	default,
+    "The Godfather",
+    "Mario Puzo",
+    "1969"
+);
+
+insert into Library values(
+	default,
+    "Person Controller",
+    "David Baddiel",
+    "2015"
+);
+
+insert into Library values(
+	default,
+    "Hold my hand",
+    "Durjoy Datta",
+    "2013"
+);
+
+mysql> select * from library;
++------+-------------------------------+---------------+--------------+
+| isbn | book_name                     | author        | publish_year |
++------+-------------------------------+---------------+--------------+
+|    1 | Time travelling with hampster | Ross Welford  | 2016         |
+|    2 | The Godfather                 | Mario Puzo    | 1969         |
+|    3 | Person Controller             | David Baddiel | 2015         |
+|    5 | Hold my hand                  | Durjoy Datta  | 2013         |
++------+-------------------------------+---------------+--------------+
+4 rows in set (0.00 sec)
+
+
+create table Library_Audit(
+	isbn int,
+    book_name varchar(50),
+    author varchar(30),
+    publish_year varchar(4),
+    status char(1)
+);
+
+
+
+// TRIGGER FOR UPDATE
+
+delimiter $$
+create trigger library_after_update
+	AFTER UPDATE ON Library
+    for each row
+BEGIN
+	insert into library_audit values(
+		old.isbn,
+        old.book_name,
+        old.author,
+        old.publish_year,
+        'U'
+    );
+
+END$$
+delimiter ;
+
+update library
+set publish_year = 2012
+where isbn = 5;
+
+mysql> select * from library_audit;
++------+--------------+--------------+--------------+--------+
+| isbn | book_name    | author       | publish_year | status |
++------+--------------+--------------+--------------+--------+
+|    5 | Hold my hand | Durjoy Datta | 2013         | U      |
++------+--------------+--------------+--------------+--------+
+1 row in set (0.00 sec)
+
+
+mysql> select * from library;
++------+-------------------------------+---------------+--------------+
+| isbn | book_name                     | author        | publish_year |
++------+-------------------------------+---------------+--------------+
+|    1 | Time travelling with hampster | Ross Welford  | 2016         |
+|    2 | The Godfather                 | Mario Puzo    | 1969         |
+|    3 | Person Controller             | David Baddiel | 2015         |
+|    5 | Hold my hand                  | Durjoy Datta  | 2012         |
++------+-------------------------------+---------------+--------------+
+4 rows in set (0.00 sec)
+
+
+
+
+// TRIGGER FOR DELETE:
+
+delimiter $$
+create trigger library_after_delete
+	AFTER DELETE ON Library
+    for each row
+BEGIN
+	insert into library_audit values(
+		old.isbn,
+        old.book_name,
+        old.author,
+        old.publish_year,
+        'D'
+    );
+
+END$$
+delimiter ;
+
+
+delete from library
+where isbn = 5;
+
+mysql> select * from library_audit;
++------+--------------+--------------+--------------+--------+
+| isbn | book_name    | author       | publish_year | status |
++------+--------------+--------------+--------------+--------+
+|    5 | Hold my hand | Durjoy Datta | 2013         | U      |
+|    5 | Hold my hand | Durjoy Datta | 2012         | D      |
++------+--------------+--------------+--------------+--------+
+2 rows in set (0.00 sec)
+
+mysql> select * from library;
++------+-------------------------------+---------------+--------------+
+| isbn | book_name                     | author        | publish_year |
++------+-------------------------------+---------------+--------------+
+|    1 | Time travelling with hampster | Ross Welford  | 2016         |
+|    2 | The Godfather                 | Mario Puzo    | 1969         |
+|    3 | Person Controller             | David Baddiel | 2015         |
++------+-------------------------------+---------------+--------------+
+3 rows in set (0.01 sec)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
