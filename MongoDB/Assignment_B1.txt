@@ -1,0 +1,670 @@
+1. Create a Collection
+
+> db.createCollection('Student');
+{ "ok" : 1 }
+> show collections;
+Student
+
+
+2. Insert documents => insert an array, also a nested Object
+
+//Insert only one doc:
+> db.Student.insert({
+... name : "Kanak",
+... Rollno : 1,
+... Skills : ["Dancing", "Craft", "Painting"],
+... Marks : {
+... "Physics" : 97,
+... "Maths" : 99
+... }
+... });
+WriteResult({ "nInserted" : 1 })
+
+> db.Student.find().pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 99
+        }
+}
+
+//Insert multiple docs.at once:
+> db.Student.insert([
+... {
+...  name : "Gaurav",
+...  Rollno : 2,
+...  Skills : ["Cricket", "Volleyball", "Chess"],
+...  Marks : {
+...  "Physics" : 95,
+...  "Maths" : 99
+...  }
+...  },
+... {
+...  name : "Mitesh",
+...  Rollno : 3,
+...  Skills : ["Cricket", "Swimming", "Volleyball"],
+...  Marks : {
+...  "Physics" : 96,
+...  "Maths" : 100
+...  }
+...  }
+... ]);
+BulkWriteResult({
+        "writeErrors" : [ ],
+        "writeConcernErrors" : [ ],
+        "nInserted" : 2,
+        "nUpserted" : 0,
+        "nMatched" : 0,
+        "nModified" : 0,
+        "nRemoved" : 0,
+        "upserted" : [ ]
+})
+> db.Student.find().pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 99
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 95,
+                "Maths" : 99
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 96,
+                "Maths" : 100
+        }
+}
+
+
+3. Update Document
+
+> db.Student.update({name : "Kanak"}, {$set : {"Marks.Maths" : 100}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+> db.Student.find({name : "Kanak"}).pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+
+
+
+4. Update Documents with 'multi'
+
+> db.Student.find().pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 95,
+                "Maths" : 99
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+
+//Updating multiple docs using multi:
+> db.Student.update({Rollno : {$gt : 1}}, {$inc : {"Marks.Maths" : 1}, $set : {"Marks.Physics" : 92}}, {multi : true});
+WriteResult({ "nMatched" : 2, "nUpserted" : 0, "nModified" : 2 })
+
+> db.Student.find().pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 101
+        }
+}
+
+
+5. Upsert
+
+> db.Student.update({name : "Sarthak"}, {$set :
+... {
+... Rollno : 4,
+... "Skills" : [
+...                 "Cricket",
+...                 "Athletic",
+...                 "Cycling"
+...         ],
+...      "Marks" : {
+...                 "Physics" : 90,
+...                 "Maths" : 98
+...         }
+... }
+... }, {upsert : true}); //use upsert
+WriteResult({
+        "nMatched" : 0,
+        "nUpserted" : 1,
+        "nModified" : 0,
+        "_id" : ObjectId("636271a370ec31503100c4d1")
+})
+
+> db.Student.find().pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 101
+        }
+}
+{
+        "_id" : ObjectId("636271a370ec31503100c4d1"),
+        "name" : "Sarthak",
+        "Marks" : {
+                "Physics" : 90,
+                "Maths" : 98
+        },
+        "Rollno" : 4,
+        "Skills" : [
+                "Cricket",
+                "Athletic",
+                "Cycling"
+        ]
+}
+
+
+
+6. Delete document
+
+> db.Student.insert({
+... Rollno : 5,
+... name : "Xyz"
+... })
+WriteResult({ "nInserted" : 1 })
+
+//Deleting the newly added Student
+> db.Student.remove({name : "Xyz"});
+WriteResult({ "nRemoved" : 1 })
+
+> db.Student.find({name : "Xyz"});
+
+
+//Deleting multiple docs at once:
+> db.Student.insert({ Rollno : 5, name : "Xyz" })
+WriteResult({ "nInserted" : 1 })
+> db.Student.insert({ Rollno : 6, name : "Abc" })
+WriteResult({ "nInserted" : 1 })
+
+> db.Student.remove({Rollno : {$gt : 4}});
+WriteResult({ "nRemoved" : 2 })
+
+> db.Student.find().pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 101
+        }
+}
+{
+        "_id" : ObjectId("636271a370ec31503100c4d1"),
+        "name" : "Sarthak",
+        "Marks" : {
+                "Physics" : 90,
+                "Maths" : 98
+        },
+        "Rollno" : 4,
+        "Skills" : [
+                "Cricket",
+                "Athletic",
+                "Cycling"
+        ]
+}
+
+7. 'slice' operator
+
+//Find the 1st 2 skills of each student :
+> db.Student.find({}, {Skills : {$slice : 2}}).pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 101
+        }
+}
+{
+        "_id" : ObjectId("636271a370ec31503100c4d1"),
+        "name" : "Sarthak",
+        "Marks" : {
+                "Physics" : 90,
+                "Maths" : 98
+        },
+        "Rollno" : 4,
+        "Skills" : [
+                "Cricket",
+                "Athletic"
+        ]
+}
+
+// Display the 1st Skill of student named 'Kanak'
+> db.Student.find({name : "Kanak"}, {Skills : {$slice : 1}}).pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+
+8. 'size' 
+
+db.Student.insert({
+... name : "Xyz",
+... Rollno : 5,
+... Skills : ["Skill1", "Skill2"],
+... Marks : {
+... "Physics" : 80,
+... "Maths" : 85
+... }
+... });
+
+db.Student.insert({
+... name : "Abc",
+... Rollno : 6,
+... Skills : ["Skill1", "Skill2"],
+... Marks : {
+... "Physics" : 70,
+... "Maths" : 75
+... }
+... });
+
+
+//Display the students which only have 2 skills
+> db.Student.find({Skills : {$size : 2}}).pretty();
+{
+        "_id" : ObjectId("636277e8cfad7dcc00c97236"),
+        "name" : "Xyz",
+        "Rollno" : 5,
+        "Skills" : [
+                "Skill1",
+                "Skill2"
+        ],
+        "Marks" : {
+                "Physics" : 80,
+                "Maths" : 85
+        }
+}
+{
+        "_id" : ObjectId("6362781ccfad7dcc00c97237"),
+        "name" : "Abc",
+        "Rollno" : 6,
+        "Skills" : [
+                "Skill1",
+                "Skill2"
+        ],
+        "Marks" : {
+                "Physics" : 70,
+                "Maths" : 75
+        }
+}
+
+9. Logical Ops => AND, OR, Comparison Ops => gt, lt
+
+//AND
+
+//Find the students which have 'cricket' and 'volleyball' both in their Skills
+> db.Student.find({$and : [{Skills : {$in : ["Cricket"]}}, {Skills : {$in : ["Volleyball"]}} ]}).pretty();
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 101
+        }
+}
+
+
+//Find the students whose rollno is greater than 1 and less than 5
+> db.Student.find({$and : [{Rollno : {$gt : 1}}, {Rollno : {$lt : 5}}] }).pretty(); // Roll nos - 2,3,4
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97231"),
+        "name" : "Gaurav",
+        "Rollno" : 2,
+        "Skills" : [
+                "Cricket",
+                "Volleyball",
+                "Chess"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("63626db7cfad7dcc00c97232"),
+        "name" : "Mitesh",
+        "Rollno" : 3,
+        "Skills" : [
+                "Cricket",
+                "Swimming",
+                "Volleyball"
+        ],
+        "Marks" : {
+                "Physics" : 92,
+                "Maths" : 101
+        }
+}
+{
+        "_id" : ObjectId("636271a370ec31503100c4d1"),
+        "name" : "Sarthak",
+        "Marks" : {
+                "Physics" : 90,
+                "Maths" : 98
+        },
+        "Rollno" : 4,
+        "Skills" : [
+                "Cricket",
+                "Athletic",
+                "Cycling"
+        ]
+}
+
+
+// OR
+
+//Find the students whose name is 'Kanak' (or) whose rollnos are > 3
+> db.Student.find({$or : [ {name : "Kanak"}, {Rollno : {$gt : 3}} ]}).pretty();
+{
+        "_id" : ObjectId("63626cdbcfad7dcc00c97230"),
+        "name" : "Kanak",
+        "Rollno" : 1,
+        "Skills" : [
+                "Dancing",
+                "Craft",
+                "Painting"
+        ],
+        "Marks" : {
+                "Physics" : 97,
+                "Maths" : 100
+        }
+}
+{
+        "_id" : ObjectId("636271a370ec31503100c4d1"),
+        "name" : "Sarthak",
+        "Marks" : {
+                "Physics" : 90,
+                "Maths" : 98
+        },
+        "Rollno" : 4,
+        "Skills" : [
+                "Cricket",
+                "Athletic",
+                "Cycling"
+        ]
+}
+{
+        "_id" : ObjectId("636277e8cfad7dcc00c97236"),
+        "name" : "Xyz",
+        "Rollno" : 5,
+        "Skills" : [
+                "Skill1",
+                "Skill2"
+        ],
+        "Marks" : {
+                "Physics" : 80,
+                "Maths" : 85
+        }
+}
+{
+        "_id" : ObjectId("6362781ccfad7dcc00c97237"),
+        "name" : "Abc",
+        "Rollno" : 6,
+        "Skills" : [
+                "Skill1",
+                "Skill2"
+        ],
+        "Marks" : {
+                "Physics" : 70,
+                "Maths" : 75
+        }
+}
+
+
+
+
+
+
+
+
+

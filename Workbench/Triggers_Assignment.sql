@@ -62,7 +62,7 @@ delimiter ;
 
 update library
 set publish_year = 2012
-where isbn = 5;
+where isbn = 6;
 
 -- select * from library;
 -- select * from library_audit;
@@ -85,7 +85,7 @@ END$$
 delimiter ;
 
 delete from library
-where isbn = 5;
+where isbn = 6;
 
 
 
