@@ -1,0 +1,387 @@
+1. Simple Index
+
+> db.Student.find({Rollno : {$gt : 3}}).explain("executionStats");
+{
+        "explainVersion" : "1",
+        "queryPlanner" : {
+                "namespace" : "College.Student",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "Rollno" : {
+                                "$gt" : 3
+                        }
+                },
+             	.....
+			.....
+        "executionStats" : {
+                "executionSuccess" : true,
+                "nReturned" : 3,
+                "executionTimeMillis" : 0,
+                "totalKeysExamined" : 0,
+                "totalDocsExamined" : 6, // As u can see, total docs examined => 6
+               ....
+			 ....
+
+}
+
+//Create Index:
+> db.Student.createIndex({Rollno : 1}, {name : "Simple_Index"});
+
+> db.Student.find({Rollno : {$gt : 3}}).explain("executionStats");
+{
+        "explainVersion" : "1",
+        ....
+		....
+        "executionStats" : {
+                "executionSuccess" : true,
+                "nReturned" : 3,
+                "executionTimeMillis" : 1,
+                "totalKeysExamined" : 3,
+                "totalDocsExamined" : 3, // After creating index, total docs examined are just => 3
+               ...
+			...
+}
+
+> db.Student.getIndexes();
+[
+        {
+                "v" : 2,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "Rollno" : 1
+                },
+                "name" : "Simple_Index"
+        }
+]
+
+2. Unique Index
+// Drop the simple index
+> db.Student.dropIndex("Simple_Index");
+{ "nIndexesWas" : 2, "ok" : 1 }
+
+
+//Create a unique index
+> db.Student.createIndex({Rollno : 1}, {unique : true});
+{
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "createdCollectionAutomatically" : false,
+        "ok" : 1
+}
+
+//Try to insert a student with 'Rollno' - 1 => Will get Duplicate Key Error
+> db.Student.insert({
+... ... name : "New_Student",
+... ... Rollno : 1,
+... ... Skills : ["Dancing", "Craft", "Painting"],
+... ... Marks : {
+... ... "Physics" : 60,
+... ... "Maths" : 90
+... ... }
+... ... });
+WriteResult({
+        "nInserted" : 0,
+        "writeError" : {
+                "code" : 11000,
+                "errmsg" : "E11000 duplicate key error collection: College.Student index: Rollno_1 dup key: { Rollno: 1.0 }"
+        }
+})
+
+
+
+3. Compound Index
+// Drop Unique Index
+db.Student.dropIndex("Rollno_1");
+
+db.Student.find({Rollno : {$gt : 2}}).explain("executionStats");
+=> TotalDocsExaminded = 6
+
+//Create compound index on rollno and name
+> db.Student.createIndex({Rollno : 1, name : -1});
+{
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "createdCollectionAutomatically" : false,
+        "ok" : 1
+}
+> db.Student.getIndexes();
+[
+        {
+                "v" : 2,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_"
+        },
+        {
+                "v" : 2,
+                "key" : {
+                        "Rollno" : 1,
+                        "name" : -1
+                },
+                "name" : "Rollno_1_name_-1"
+        }
+]
+
+> db.Student.find({Rollno : {$gt : 2}}).explain("executionStats");
+"totalDocsExamined" = 4 (instead of all 6)
+
+
+
+4. Aggregation
+
+db.createCollection("cities");
+
+// Insert the data
+db.cities.insertMany([
+    {"name": "Seoul", "country": "South Korea", "continent": "Asia", "population": 25.674 },
+    {"name": "Mumbai", "country": "India", "continent": "Asia", "population": 19.980 },
+    {"name": "Lagos", "country": "Nigeria", "continent": "Africa", "population": 13.463 },
+    {"name": "Beijing", "country": "China", "continent": "Asia", "population": 19.618 },
+    {"name": "Shanghai", "country": "China", "continent": "Asia", "population": 25.582 },
+    {"name": "Osaka", "country": "Japan", "continent": "Asia", "population": 19.281 },
+    {"name": "Cairo", "country": "Egypt", "continent": "Africa", "population": 20.076 },
+    {"name": "Tokyo", "country": "Japan", "continent": "Asia", "population": 37.400 },
+    {"name": "Karachi", "country": "Pakistan", "continent": "Asia", "population": 15.400 },
+    {"name": "Dhaka", "country": "Bangladesh", "continent": "Asia", "population": 19.578 },
+    {"name": "Rio de Janeiro", "country": "Brazil", "continent": "South America", "population": 13.293 },
+    {"name": "São Paulo", "country": "Brazil", "continent": "South America", "population": 21.650 },
+    {"name": "Mexico City", "country": "Mexico", "continent": "North America", "population": 21.581 },
+    {"name": "Delhi", "country": "India", "continent": "Asia", "population": 28.514 },
+    {"name": "Buenos Aires", "country": "Argentina", "continent": "South America", "population": 14.967 },
+    {"name": "Kolkata", "country": "India", "continent": "Asia", "population": 14.681 },
+    {"name": "New York", "country": "United States", "continent": "North America", "population": 18.819 },
+    {"name": "Manila", "country": "Philippines", "continent": "Asia", "population": 13.482 },
+    {"name": "Chongqing", "country": "China", "continent": "Asia", "population": 14.838 },
+    {"name": "Istanbul", "country": "Turkey", "continent": "Europe", "population": 14.751 }
+])
+
+
+// distinct
+
+//find the distinct continents
+> db.cities.distinct('continent');
+[ "Africa", "Asia", "Europe", "North America", "South America" ]
+
+// count
+
+//count the total documents/cities
+> db.cities.count();
+20
+
+//count the cities in Asia:
+> db.cities.count({continent : "Asia"});
+12
+
+
+//AGGREGATION PIPELINE:
+
+// $match:
+
+//find all the cities/documents
+> db.citites.aggregate([
+... {$match : {}}
+... ])
+> db.cities.aggregate([ {$match : {}} ])
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97241"), "name" : "Seoul", "country" : "South Korea", "continent" : "Asia", "population" : 25.674 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97242"), "name" : "Mumbai", "country" : "India", "continent" : "Asia", "population" : 19.98 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97243"), "name" : "Lagos", "country" : "Nigeria", "continent" : "Africa", "population" : 13.463 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97244"), "name" : "Beijing", "country" : "China", "continent" : "Asia", "population" : 19.618 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97245"), "name" : "Shanghai", "country" : "China", "continent" : "Asia", "population" : 25.582 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97246"), "name" : "Osaka", "country" : "Japan", "continent" : "Asia", "population" : 19.281 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97247"), "name" : "Cairo", "country" : "Egypt", "continent" : "Africa", "population" : 20.076 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97248"), "name" : "Tokyo", "country" : "Japan", "continent" : "Asia", "population" : 37.4 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97249"), "name" : "Karachi", "country" : "Pakistan", "continent" : "Asia", "population" : 15.4 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724a"), "name" : "Dhaka", "country" : "Bangladesh", "continent" : "Asia", "population" : 19.578 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724b"), "name" : "Rio de Janeiro", "country" : "Brazil", "continent" : "South America", "population" : 13.293 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724c"), "name" : "São Paulo", "country" : "Brazil", "continent" : "South America", "population" : 21.65 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724d"), "name" : "Mexico City", "country" : "Mexico", "continent" : "North America", "population" : 21.581 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724e"), "name" : "Delhi", "country" : "India", "continent" : "Asia", "population" : 28.514 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724f"), "name" : "Buenos Aires", "country" : "Argentina", "continent" : "South America", "population" : 14.967 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97250"), "name" : "Kolkata", "country" : "India", "continent" : "Asia", "population" : 14.681 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97251"), "name" : "New York", "country" : "United States", "continent" : "North America", "population" : 18.819 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97252"), "name" : "Manila", "country" : "Philippines", "continent" : "Asia", "population" : 13.482 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97253"), "name" : "Chongqing", "country" : "China", "continent" : "Asia", "population" : 14.838 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97254"), "name" : "Istanbul", "country" : "Turkey", "continent" : "Europe", "population" : 14.751 }
+
+
+//find all the cities which are in continent North America
+> db.cities.aggregate([
+... {$match : {continent : "North America"}}
+... ])
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724d"), "name" : "Mexico City", "country" : "Mexico", "continent" : "North America", "population" : 21.581 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97251"), "name" : "New York", "country" : "United States", "continent" : "North America", "population" : 18.819 }
+
+> db.cities.count({continent : "North America"});
+2
+
+//find cities present in North America and South America:
+> db.cities.aggregate([
+... {$match : {continent : {$in : ["North America", "South America"]}}}
+... ])
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724b"), "name" : "Rio de Janeiro", "country" : "Brazil", "continent" : "South America", "population" : 13.293 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724c"), "name" : "São Paulo", "country" : "Brazil", "continent" : "South America", "population" : 21.65 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724d"), "name" : "Mexico City", "country" : "Mexico", "continent" : "North America", "population" : 21.581 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c9724f"), "name" : "Buenos Aires", "country" : "Argentina", "continent" : "South America", "population" : 14.967 }
+{ "_id" : ObjectId("6363cc0fcfad7dcc00c97251"), "name" : "New York", "country" : "United States", "continent" : "North America", "population" : 18.819 }
+
+
+// $sort:
+
+//sort the cities according to population (desc.order)
+db.cities.aggregate([
+	{$sort : {population : -1}}
+])
+
+
+// $group:
+
+//Find all the countries and their resp.continets:
+
+//grp by continent and country (as there can be multiple cities in a country)
+db.cities.aggregate([
+{
+	$group : {
+		_id : { 
+			continent : "$continent",
+			"country" : "$country"
+	}
+}}
+]);
+
+
+//group according to countries:
+db.cities.aggregate([
+{
+	$group : {
+		_id : "$country"
+	}
+}
+])
+
+
+
+// display each country, their max population and count of all cities in that country
+Also sort them aplhabetically according to country name: (Using $group, $sort and $sum in one query)
+> db.cities.aggregate([
+... {
+... $group : {
+... _id : "$country",
+... max_Population : {$max : "$population"},
+... total_Cities : {$sum : 1}
+... }
+... },
+... {
+... $sort : {_id : 1}
+... }
+... ]);
+
+{ "_id" : "Argentina", "max_Population" : 14.967, "total_Cities" : 1 }
+{ "_id" : "Bangladesh", "max_Population" : 19.578, "total_Cities" : 1 }
+{ "_id" : "Brazil", "max_Population" : 21.65, "total_Cities" : 2 }
+{ "_id" : "China", "max_Population" : 25.582, "total_Cities" : 3 }
+{ "_id" : "Egypt", "max_Population" : 20.076, "total_Cities" : 1 }
+{ "_id" : "India", "max_Population" : 28.514, "total_Cities" : 3 }
+{ "_id" : "Japan", "max_Population" : 37.4, "total_Cities" : 2 }
+{ "_id" : "Mexico", "max_Population" : 21.581, "total_Cities" : 1 }
+{ "_id" : "Nigeria", "max_Population" : 13.463, "total_Cities" : 1 }
+{ "_id" : "Pakistan", "max_Population" : 15.4, "total_Cities" : 1 }
+{ "_id" : "Philippines", "max_Population" : 13.482, "total_Cities" : 1 }
+{ "_id" : "South Korea", "max_Population" : 25.674, "total_Cities" : 1 }
+{ "_id" : "Turkey", "max_Population" : 14.751, "total_Cities" : 1 }
+{ "_id" : "United States", "max_Population" : 18.819, "total_Cities" : 1 }
+
+
+
+
+
+
+
+
+
+
+
+//Practice:
+db.orders.insert(
+     [
+          {product: "toothbrush", total: 4.75, customer: "Mike"},
+          {product: "guitar", total: 199.99, customer: "Tom"},
+          {product: "milk", total: 11.33, customer: "Mike"},
+          {product: "pizza", total: 8.50, customer: "Karen"},
+          {product: "toothbrush", total: 4.75, customer: "Karen"},
+          {product: "pizza", total: 4.75, customer: "Dave"},
+          {product: "toothbrush", total: 4.75, customer: "Mike"}
+     ]
+);
+
+
+
+
+db.orders.aggregate([
+	{$match : {}},
+	{$group : {_id : "$customer", total : {$sum : "$total"}}}
+]);
+
+
+
+
+
+db.Student.aggregate([
+	{$group : {_id : "SumOfAges", RollnosTotal : {$sum : "$Rollno"}}}
+]);
+
+
+db.Student.aggregate([
+	{$group : {
+		_id : "RandomId",
+		TotalOfRollNo : {$sum : "$Rollno"},
+		minRollNo : {$min : "$Rollno"},
+		maxRollNo : {$max : "$Rollno"}
+	}}
+])
+
+
+db.Student.aggregate([
+	{$group : {
+		_id : "$name"
+	}}
+]);
+
+db.Student.aggregate([
+	{$match : {"Rollno" : {$lt : 4}}},
+	{$limit : 2}
+])
+
+
+db.Student.aggregate([
+	{$match : {"Rollno" : {$lt : 4}}},
+	{$skip : 2}
+])
+
+
+db.Student.aggregate([
+	{$unwind : "$Skills"}
+])
+
+
+
+db.Student.aggregate([
+	{$unwind : "$Skills"},
+	{$match : {Skills : "Volleyball"}},
+	{$group : {
+		_id : "$name", 
+		FavSport : {$push : "$Skills"}
+	}}
+]);
+
+
+
+
+
+
