@@ -17,7 +17,6 @@ public class Main {
 
         try {
             //todo connecting to the instance of mongodb:
-//            mongoClient = MongoClients.create("mongodb+srv://PCSB:xenia1234@xeniacluster.ehu7w.mongodb.net/Xenia_Database?retryWrites=true&w=majority");
             mongoClient = MongoClients.create("mongodb://localhost:27017");
             System.out.println("Connected to the db!");
 
